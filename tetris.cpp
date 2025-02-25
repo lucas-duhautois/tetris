@@ -17,6 +17,7 @@ sf::Keyboard::Key pausing = sf::Keyboard::Escape; // pause
 const int resize = 1; // facteur de changement de taille de la fenêtre (pour une fenêtre 2 fois plus grande, resize = 2)
 const int seed = 42; // changer la seed pour changer l'ordre d'apparition des pièces
 int dt = 100000; // délai entre 2 actions (en microsecondes) ; multiplier par 10 pour avoir le délai initial entre 2 chutes de la pièce
+const int inverseDifficulty = 5; // nombre de lignes nécessaires à réaliser pour diminuer dt de 10%
 
 sf::RenderWindow window(sf::VideoMode(634*resize, 387*resize), "Validation SFML");
 
@@ -530,11 +531,10 @@ int main() {
 
     int middlex = game.dim().first/2; // milieu hotizontal de la grille
 
-    std::vector<piece *> tetrominos {};
-    tetrominos.push_back(generation(alea, middlex));
+    piece* tetromino = generation(alea, middlex);
 
     alea = rand() % 7;
-    tetrominos.push_back(generation(alea, middlex)); // génère une pièce en avance pour pouvoir afficher la pièce suivante
+    piece* next_tetromino = generation(alea, middlex); // génère une pièce en avance pour pouvoir afficher la pièce suivante
 
     while (window.isOpen()) {
         sf::Event event;
@@ -550,26 +550,26 @@ int main() {
         game.print();
         printScore.setString(std::to_string(score));
         window.draw(printScore);
-        tetrominos[i+1]->printNext(window);
+        next_tetromino->printNext(window);
 
         if (!(gameOver)) {
 
-            tetrominos[i]->remove(game);
+            tetromino->remove(game);
 
             if (sf::Keyboard::isKeyPressed(rotating)){
-                tetrominos[i]->rotate(game);
+                tetromino->rotate(game);
                 usleep(dt); // évite de tourner plusieurs fois
             }
             else if (sf::Keyboard::isKeyPressed(left)){
-                tetrominos[i]->move_left(game);
+                tetromino->move_left(game);
                 usleep(dt); // évite de bouger plusieurs fois
             }
             else if (sf::Keyboard::isKeyPressed(right)){
-                tetrominos[i]->move_right(game);
+                tetromino->move_right(game);
                 usleep(dt); // évite de bouger plusieurs fois
             }
             else if (sf::Keyboard::isKeyPressed(down)){
-                tetrominos[i]->fastFall(game);
+                tetromino->fastFall(game);
                 usleep(dt); // évite de faire tomber plusieurs pièces de suite
             }
             else if (sf::Keyboard::isKeyPressed(pausing)){
@@ -591,19 +591,18 @@ int main() {
                 window.display();
             }
         
-            if (counter == 10) { // fait tomber la pièce naturellement une fois sur 10
-                tetrominos[i]->fall();
-                if (tetrominos[i]->verify(game)) {
-                    tetrominos[i]->up(); // corrige le dernier mouvement illégal du tetromino
-                    tetrominos[i]->add(game);
-                    delete(tetrominos[i]);
+            if (counter >= 10) { // fait tomber la pièce naturellement une fois sur 10
+                tetromino->fall();
+                if (tetromino->verify(game)) {
+                    tetromino->up(); // corrige le dernier mouvement illégal du tetromino
+                    tetromino->add(game);
+                    tetromino = next_tetromino;
                     alea = rand() % 7;
-                    tetrominos.push_back(generation(alea, middlex));
-                    i++;
+                    next_tetromino = generation(alea, middlex);
                     dscore = game.line(); // supprime les lignes remplies et incrémente le score de manière idoine
                     score = score + dscore;
                     Dscore = Dscore + dscore;
-                    if (tetrominos[i]->verify(game)) { // on perd si la nouvelle pièce est initialement en collision
+                    if (tetromino->verify(game)) { // on perd si la nouvelle pièce est initialement en collision
                         gameOver = true;
                     }
                 }
@@ -611,9 +610,9 @@ int main() {
             }
 
 
-            tetrominos[i]->add(game);
+            tetromino->add(game);
 
-            if (Dscore >= 5) { // accélère le jeu toutes les 5 lignes supprimées
+            if (Dscore >= inverseDifficulty) { // accélère le jeu toutes les 5 lignes supprimées (peut être changé par le paramètre difficulty)
                 Dscore = 0;
                 dt = dt*0.9;
             }

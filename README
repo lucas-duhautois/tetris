@@ -1,4 +1,4 @@
-Ceci est un jeu de tétris codé en C++ qui se joue dans une fenêtre sfml
+Ceci est un jeu de tétris codé en C++ qui se joue dans une fenêtre sfml.
 
 Pour lancer le jeu :
 - compiler en utilisant le makefile (taper make dans un terminal)
@@ -6,10 +6,10 @@ Pour lancer le jeu :
 - enjoy !
 
 Les contrôles sont définis en début de code.
-Par défaut, ils sont adaptés à un clavier AZERTY (ZQSD).
-Vous pouvez les changer si vous avez un clavier QWERTY.
+Par défaut, ils sont adaptés à un clavier AZERTY (ZQSD), vous pouvez les changer si vous avez un clavier QWERTY.
 
 Certains paramètres sont également définis en début de code et peuvent être changé :
 - modifiez resize pour changer la taille du jeu si vous n'avez pas un petit écran 14 pouces comme moi
 - modifiez seed pour changer l'aléatoire et ne plus vous ennuyer si vous avez trop joué
 - modifiez dt pour accélérer ou ralentir la partie
+- modifiez inverseDifficulty pour que le jeu s'accélére de plus en plus vite (ou de moins en moins vite) ATTENTION : augmenter inverseDifficulty fait que le jeu est plus facile !
